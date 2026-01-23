@@ -1,0 +1,22 @@
+# HOLFY27 holuser sudoers configuration
+# This file is copied to /etc/sudoers.d/holdoers
+#
+# Allows holuser to run specific commands without password for lab operations
+
+# Allow holuser to run apt commands for package installation
+holuser ALL=(ALL) NOPASSWD: /usr/bin/apt, /usr/bin/apt-get, /usr/bin/dpkg, /usr/bin/dpkg-query, /usr/bin/snap
+
+# Allow holuser to manage services
+holuser ALL=(ALL) NOPASSWD: /usr/bin/systemctl
+
+# Allow holuser to run mount commands (for NFS operations)
+holuser ALL=(ALL) NOPASSWD: /usr/bin/mount, /usr/bin/umount
+
+# Allow holuser to run network diagnostic commands
+holuser ALL=(ALL) NOPASSWD: /usr/bin/ping, /usr/bin/nc, /usr/bin/dig, /usr/bin/nslookup
+
+# Allow holuser to run the labstartup scripts
+holuser ALL=(ALL) NOPASSWD: /home/holuser/hol/labstartup.sh, /home/holuser/hol/labstartup.py
+
+# Allow holuser to reboot the manager
+holuser ALL=(ALL) NOPASSWD: /usr/sbin/reboot

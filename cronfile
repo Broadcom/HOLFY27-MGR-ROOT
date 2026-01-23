@@ -1,0 +1,8 @@
+# HOLFY27 Manager Root Cron Configuration
+# This file is installed via: crontab /root/cronfile
+#
+# At boot:
+#   1. Execute gitpull.sh to update Core Team repository
+#   2. Execute mount.sh to setup NFS, vpodrepo, and console mounts
+
+@reboot /root/gitpull.sh; /root/mount.sh >> /tmp/mount.log 2>&1

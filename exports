@@ -1,0 +1,11 @@
+# /etc/exports - HOLFY27 NFS Exports Configuration
+# This file is copied to /etc/exports during manager setup
+#
+# Export /tmp/holorouter to the holorouter VM for secure file-based communication
+# The holorouter mounts this directory in read-write mode to:
+#   1. Read configuration files placed by the manager
+#   2. Mark files as processed by removing them (reset on router reboot)
+#
+# Security: Only the holorouter IP (10.1.10.129) can access this export
+
+/tmp/holorouter 10.1.10.129(rw,sync,no_subtree_check,no_root_squash)
