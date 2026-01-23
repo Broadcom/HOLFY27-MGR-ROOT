@@ -104,12 +104,11 @@ if ! command -v oh-my-posh &> /dev/null; then
     log_message "oh-my-posh could not be found - installing..."
     curl -s https://ohmyposh.dev/install.sh | bash -s -- -d /usr/bin
     chmod 755 /usr/bin/oh-my-posh
-    mkdir -p /root/.config/ohmyposh
     log_message "oh-my-posh installed"
 else
     log_message "oh-my-posh already installed"
 fi
-
+mkdir -p /root/.config/ohmyposh
 # Make sure the oh-my-posh config file is present
 if [ ! -f /root/.config/ohmyposh/holoconsole.omp.json ]; then
     log_message "oh-my-posh config file not found - creating..."
@@ -121,8 +120,6 @@ if [ ! -f /root/.config/ohmyposh/holoconsole.omp.json ]; then
             eval "$(oh-my-posh init bash --config ~/.config/ohmyposh/holoconsole.omp.json)"
         fi
     fi' >> /root/.bashrc
-    log_message "oh-my-posh config file created"
-EOF
     log_message "oh-my-posh config file created"
 fi
 
