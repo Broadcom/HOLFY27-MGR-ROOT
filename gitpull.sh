@@ -124,6 +124,7 @@ if [ ! -f /root/.config/ohmyposh/holoconsole.omp.json ]; then
 fi
 
 # Make sure the oh-my-posh config file is present for holuser
+mkdir -p /home/holuser/.config/ohmyposh
 if [ ! -f /home/holuser/.config/ohmyposh/holoconsole.omp.json ]; then
     log_message "oh-my-posh config file for holuser not found - creating..."
     # Retrieve the config file from https://raw.githubusercontent.com/burkeazbill/DimensionQuestDotFiles/refs/heads/main/.config/ohmyposh/holoconsole.omp.json
