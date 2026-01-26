@@ -75,17 +75,16 @@ if ! command -v tdns-mgr &> /dev/null; then
     curl -o /usr/bin/tdns-mgr https://raw.githubusercontent.com/burkeazbill/tdns-mgr/refs/heads/main/tdns-mgr.sh
     chmod 755 /usr/bin/tdns-mgr
     /usr/bin/tdns-mgr completion bash | sudo tee /etc/bash_completion.d/tdns-mgr > /dev/null
-    mkdir -p /root/.config/tdns-mgr
     log_message "tdns-mgr installed and command completion enabled"
 else
     log_message "tdns-mgr already installed"
 fi
-
+mkdir -p /etc/tdns-mgr
 # Make sure the tdns-mgr config file is present
-if [ ! -f /root/.config/tdns-mgr/.tdns-mgr.conf ]; then
+if [ ! -f /etc/tdns-mgr/.tdns-mgr.conf ]; then
     log_message "tdns-mgr config file not found - creating..."
     # create a default config file
-    cat > /root/.config/tdns-mgr/.tdns-mgr.conf <<EOF
+    cat > /etc/tdns-mgr/.tdns-mgr.conf <<EOF
 # Environment variables for tdns-mgr.sh
 DNS_SERVER=10.1.10.129
 DNS_PORT=5380
@@ -94,10 +93,12 @@ DNS_TOKEN=
 DNS_USER=admin
 DNS_PASS=
 EOF
-    log_message "tdns-mgr config file created"
+    log_message "tdns-mgr config file created in /etc/tdns-mgr"
 fi
-
+chmod 755 /etc/tdns-mgr
+chmod 664 /etc/tdns-mgr/.tdns-mgr.conf
 cat /home/holuser/creds.txt | tdns-mgr login
+
 
 # Install oh-my-posh
 if ! command -v oh-my-posh &> /dev/null; then
