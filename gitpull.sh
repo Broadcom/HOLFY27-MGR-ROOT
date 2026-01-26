@@ -97,8 +97,7 @@ EOF
 fi
 chmod 755 /etc/tdns-mgr
 chmod 664 /etc/tdns-mgr/.tdns-mgr.conf
-cat /home/holuser/creds.txt | tdns-mgr login
-
+log_message "$(cat /home/holuser/creds.txt | tdns-mgr login)"
 
 # Install oh-my-posh
 if ! command -v oh-my-posh &> /dev/null; then
