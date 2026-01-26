@@ -99,6 +99,11 @@ chmod 755 /etc/tdns-mgr
 chmod 664 /etc/tdns-mgr/.tdns-mgr.conf
 log_message "$(cat /home/holuser/creds.txt | tdns-mgr login)"
 
+mkdir -p /home/holuser/.config/tdns-mgr
+cp /etc/tdns-mgr/.tdns-mgr.conf /home/holuser/.config/tdns-mgr/.tdns-mgr.conf
+chown holuser:holuser -R /home/holuser/.config
+chmod 600 /home/holuser/.config/tdns-mgr/.tdns-mgr.conf
+
 # Install oh-my-posh
 if ! command -v oh-my-posh &> /dev/null; then
     log_message "oh-my-posh could not be found - installing..."
