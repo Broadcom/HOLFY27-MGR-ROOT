@@ -16,7 +16,7 @@ holuser ALL=(ALL) NOPASSWD: /usr/bin/mount, /usr/bin/umount
 holuser ALL=(ALL) NOPASSWD: /usr/bin/ping, /usr/bin/nc, /usr/bin/dig, /usr/bin/nslookup
 
 # Allow holuser to run the labstartup scripts
-holuser ALL=(ALL) NOPASSWD: /home/holuser/hol/labstartup.sh, /home/holuser/hol/labstartup.py
+holuser ALL=(ALL) NOPASSWD: /home/holuser/hol/labstartup.sh, /home/holuser/hol/labstartup.py, /home/holuser/hol/Shutdown/Shutdown.py
 
 # Allow holuser to reboot the manager
-holuser ALL=(ALL) NOPASSWD: /usr/sbin/reboot
+holuser ALL=(ALL) NOPASSWD: /usr/sbin/reboot, /usr/sbin/shutdown
