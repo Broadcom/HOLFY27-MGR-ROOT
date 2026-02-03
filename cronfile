@@ -5,4 +5,4 @@
 #   1. Execute gitpull.sh to update Core Team repository
 #   2. Execute mount.sh to setup NFS, vpodrepo, and console mounts
 
-@reboot /root/gitpull.sh; /root/mount.sh >> /tmp/mount.log 2>&1
+@reboot /root/hol/gitpull.sh; /root/hol/mount.sh >> /tmp/mount.log 2>&1

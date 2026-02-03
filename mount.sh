@@ -81,13 +81,11 @@ retry_with_timeout() {
 
 clear_mount() {
     # make sure we have clean mount points
-    mount | grep "${1}" > /dev/null
-    if [ $? = 1 ]; then   # mount point is not mounted
+    if ! mount | grep -q "${1}"; then   # mount point is not mounted
         log_message "Clearing ${1}..."
         rm -rf "${1}" > /dev/null 2>&1
         mkdir "${1}"
-        chown holuser "${1}"
-        chgrp holuser "${1}"
+        chown holuser:holuser "${1}"
         chmod 775 "${1}"
     fi
 }
@@ -172,9 +170,7 @@ setup_nfs_server
 
 ########## Begin /vpodrepo mount handling ##########
 # check for /vpodrepo mount and prepare volume if possible
-mount | grep /vpodrepo > /dev/null
-# shellcheck disable=SC2181
-if [ $? = 0 ]; then # mount is there now is the volume ready
+if mount | grep -q /vpodrepo; then # mount is there now is the volume ready
     if [ -d /vpodrepo/lost+found ]; then
         log_message "/vpodrepo volume is ready."
     fi
@@ -183,12 +179,9 @@ else
     # attempt to mount /dev/sdb1
     if [ -b /dev/sdb1 ]; then
         log_message "/dev/sdb1 is a block device file. Attempting to mount /vpodrepo..."
-        mount /dev/sdb1 /vpodrepo
-        # shellcheck disable=SC2181
-        if [ $? = 0 ]; then
+        if mount /dev/sdb1 /vpodrepo; then
             log_message "Successful mount of /vpodrepo."
-            chown holuser /vpodrepo/* > /dev/null
-            chgrp holuser /vpodrepo/* > /dev/null
+            chown -R holuser:holuser /vpodrepo/* > /dev/null 2>&1
         fi
     else # now the tricky part - need to prepare the drive
         log_message "Preparing new volume..."
@@ -209,8 +202,7 @@ END
                 /usr/sbin/mke2fs -t ext4 /dev/sdb1
                 log_message "Mounting /vpodrepo"
                 mount /dev/sdb1 /vpodrepo
-                chown holuser /vpodrepo
-                chgrp holuser /vpodrepo
+                chown holuser:holuser /vpodrepo
                 chmod 775 /vpodrepo
             fi
         fi
@@ -234,9 +226,9 @@ fi
 ########## Begin console Type check and Mount ##########
 log_message "Checking for LMC at ${maincon}:2049..."
 # Loop for 6 total attempts (1 initial + 5 retries)
-for i in $(seq 1 6); do
+for i in {1..6}; do
     # Correctly check the exit code of nc
-    if nc -z $maincon 2049; then
+    if nc -z "${maincon}" 2049; then
         log_message "LMC detected (Attempt $i/6). Performing NFS mount..."
         while [ ! -d /lmchol/home/holuser/desktop-hol ]; do
             log_message "Mounting / on the LMC to /lmchol..."
@@ -248,8 +240,7 @@ for i in $(seq 1 6); do
     fi
 
     # If this was the last attempt, don't sleep
-    # shellcheck disable=SC2086
-    if [ $i -eq 6 ]; then
+    if [ "$i" -eq 6 ]; then
         break
     fi
 
@@ -258,7 +249,7 @@ for i in $(seq 1 6); do
 done
 
 # Only check for WMC if LMC not detected - WMC REMOVED in HOLFY27
-if [ $LMC = false ]; then
+if [ "$LMC" = false ]; then
     log_message "LMC not detected. HOLFY27 requires Linux Main Console."
     mark_mount_failed "LMC (port 2049) not detected on ${maincon}. WMC is not supported."
     mkdir -p /lmchol/hol
@@ -271,7 +262,7 @@ fi
 # the holuser account copies the config.ini to /tmp from 
 # either the mainconsole (must wait for the mount)
 # or from the vpodrepo
-while [ ! -f $configini ]; do
+while [ ! -f "$configini" ]; do
     log_message "Waiting for ${configini}..."
     sleep 3
 done
@@ -281,7 +272,7 @@ cloudinfo="/tmp/cloudinfo.txt"
 vlp_cloud="NOT REPORTED"
 while [ "${vlp_cloud}" = "NOT REPORTED" ]; do
     sleep 30
-    if [ -f $cloudinfo ]; then
+    if [ -f "$cloudinfo" ]; then
         vlp_cloud=$(cat $cloudinfo)
         log_message "vlp_cloud: $vlp_cloud"
         break
@@ -293,12 +284,12 @@ secure_holuser
 
 # LMC-specific actions
 sshoptions='-o StrictHostKeyChecking=accept-new'
-if [ $LMC = true ]; then
+if [ "$LMC" = true ]; then
     # remove the manager bookmark from nautilus
     if [ "${vlp_cloud}" != "NOT REPORTED" ]; then
         log_message "Removing manager bookmark from Nautilus."
         sshpass -p "${password}" scp "${sshoptions}" ${lmcbookmarks} /root/bookmarks.orig
-        cat bookmarks.orig | grep -vi manager > /root/bookmarks
+        grep -vi manager /root/bookmarks.orig > /root/bookmarks
         sshpass -p "${password}" scp "${sshoptions}" /root/bookmarks ${lmcbookmarks}
     else
         log_message "Not removing manager bookmark from Nautilus."

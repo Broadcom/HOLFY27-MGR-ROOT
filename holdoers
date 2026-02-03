@@ -1,4 +1,5 @@
-# HOLFY27 holuser sudoers configuration
+# HOLFY27 holuser sudoers configuration for manager
+# Version 1.0 - January 2026
 # This file is copied to /etc/sudoers.d/holdoers
 #
 # Allows holuser to run specific commands without password for lab operations
