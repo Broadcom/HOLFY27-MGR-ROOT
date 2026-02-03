@@ -6,3 +6,4 @@
 #   2. Execute mount.sh to setup NFS, vpodrepo, and console mounts
 
 @reboot /root/hol/gitpull.sh; /root/hol/mount.sh >> /tmp/mount.log 2>&1
+  
