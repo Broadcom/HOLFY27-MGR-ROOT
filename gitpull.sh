@@ -16,6 +16,14 @@ log_message() {
 
 log_message "Starting root gitpull.sh"
 
+# Check for offline mode (set by offline-ready.py for partner lab exports)
+# In offline mode, skip all network operations (proxy wait, git pull, tool downloads)
+if [ -f "${HOLROOT}/.offline-mode" ]; then
+    log_message "OFFLINE MODE: Skipping proxy wait, git pull, and downloads"
+    log_message "Root gitpull.sh completed (offline mode)"
+    exit 0
+fi
+
 # Wait for network/proxy to be available
 wait_for_proxy() {
     local max_attempts=60
