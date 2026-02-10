@@ -24,6 +24,17 @@ if [ -f "${HOLROOT}/.offline-mode" ]; then
     exit 0
 fi
 
+# Check for testing mode - skip git pull to preserve local changes
+# Note: /lmchol is not mounted yet (mount.sh runs after gitpull.sh),
+# so we check the holuser local path. Root can read this file.
+TESTING_FLAG="/home/holuser/hol/testing"
+if [ -f "${TESTING_FLAG}" ]; then
+    log_message "TESTING MODE: Skipping git pull to preserve local changes"
+    log_message "*** Delete ${TESTING_FLAG} before capturing to catalog! ***"
+    log_message "Root gitpull.sh completed (testing mode)"
+    exit 0
+fi
+
 # Wait for network/proxy to be available
 wait_for_proxy() {
     local max_attempts=60
