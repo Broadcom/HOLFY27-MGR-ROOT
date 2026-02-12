@@ -1,6 +1,6 @@
 #!/bin/bash
 # mount.sh - HOLFY27 Manager Root Mount Script
-# Version 1.0 - January 2026
+# Version 1.1 - 2026-02-12
 # Author - Burke Azbill and HOL Core Team
 # Enhanced with NFS server for holorouter communication
 #==============================================================================
@@ -262,8 +262,17 @@ fi
 # the holuser account copies the config.ini to /tmp from 
 # either the mainconsole (must wait for the mount)
 # or from the vpodrepo
+# Timeout after 10 minutes (200 attempts x 3 seconds) to prevent infinite loop
+# (e.g., HOL-BADSKU base template where labstartup.sh creates config from defaultconfig.ini)
+configini_wait=0
+configini_max_wait=200
 while [ ! -f "$configini" ]; do
-    log_message "Waiting for ${configini}..."
+    configini_wait=$((configini_wait + 1))
+    if [ "$configini_wait" -ge "$configini_max_wait" ]; then
+        log_message "WARNING: Timed out waiting for ${configini} after $((configini_max_wait * 3)) seconds. Continuing without it."
+        break
+    fi
+    log_message "Waiting for ${configini}... (${configini_wait}/${configini_max_wait})"
     sleep 3
 done
 
