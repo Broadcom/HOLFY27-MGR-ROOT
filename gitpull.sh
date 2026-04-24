@@ -206,16 +206,49 @@ if [ -f "${TESTING_FLAG}" ]; then
     exit 0
 fi
 
-# Make sure additional required tools are present in the environment
-if ! command -v tdns-mgr &> /dev/null; then
-    log_message "tdns-mgr could not be found - installing..."
-    # download https://raw.githubusercontent.com/burkeazbill/tdns-mgr/refs/heads/main/tdns-mgr.sh as /usr/bin/tdns-mgr
-    curl -o /usr/bin/tdns-mgr https://raw.githubusercontent.com/burkeazbill/tdns-mgr/refs/heads/main/tdns-mgr.sh
-    chmod 755 /usr/bin/tdns-mgr
-    /usr/bin/tdns-mgr completion bash | sudo tee /etc/bash_completion.d/tdns-mgr > /dev/null
-    log_message "tdns-mgr installed and command completion enabled"
+# tdns-mgr: version check against upstream, optional update, dual-path install
+TDNS_MGR_URL="https://raw.githubusercontent.com/burkeazbill/tdns-mgr/refs/heads/main/tdns-mgr.sh"
+TDNS_MGR_HOL_BIN="/home/holuser/.local/bin/tdns-mgr"
+TDNS_MGR_USR_BIN="/usr/bin/tdns-mgr"
+
+# Peek at upstream script; extract VERSION="x.y.z" from the first ~30 lines only.
+tdns_mgr_remote_version() {
+    curl -sfL "${TDNS_MGR_URL}" 2>/dev/null | head -n 30 | sed -n 's/^VERSION="\([^"]*\)".*/\1/p' | head -n 1
+}
+
+tdns_mgr_local_version() {
+    if command -v tdns-mgr &> /dev/null; then
+        tdns-mgr --version 2>/dev/null | sed -n 's/^DNS Manager v\(.*\)/\1/p' | tr -d '\r\n'
+    fi
+}
+
+remote_ver=$(tdns_mgr_remote_version)
+local_ver=$(tdns_mgr_local_version)
+
+if [ -z "${remote_ver}" ]; then
+    log_message "WARNING: Could not read tdns-mgr VERSION from upstream; skipping tdns-mgr install/update"
+    if ! command -v tdns-mgr &> /dev/null; then
+        log_message "WARNING: tdns-mgr is not installed"
+    fi
+elif [ -n "${local_ver}" ] && [ "${remote_ver}" = "${local_ver}" ]; then
+    log_message "tdns-mgr up to date (${local_ver})"
 else
-    log_message "tdns-mgr already installed"
+    tmpfile=$(mktemp /tmp/tdns-mgr.XXXXXX 2>/dev/null) || tmpfile=""
+    if [ -z "${tmpfile}" ]; then
+        log_message "WARNING: mktemp failed; skipping tdns-mgr install/update"
+    elif curl -sfL "${TDNS_MGR_URL}" -o "${tmpfile}" 2>/dev/null && [ -s "${tmpfile}" ]; then
+        chmod 755 "${tmpfile}"
+        mkdir -p "/home/holuser/.local/bin"
+        cp "${tmpfile}" "${TDNS_MGR_USR_BIN}"
+        cp "${tmpfile}" "${TDNS_MGR_HOL_BIN}"
+        chown holuser:holuser "${TDNS_MGR_HOL_BIN}"
+        rm -f "${tmpfile}"
+        "${TDNS_MGR_USR_BIN}" completion bash | tee /etc/bash_completion.d/tdns-mgr > /dev/null
+        log_message "tdns-mgr installed/updated to ${remote_ver} (bash completion refreshed)"
+    else
+        log_message "WARNING: tdns-mgr download failed; keeping existing install"
+        rm -f "${tmpfile}"
+    fi
 fi
 mkdir -p /etc/tdns-mgr
 # Make sure the tdns-mgr config file is present
