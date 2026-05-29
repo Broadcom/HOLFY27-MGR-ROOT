@@ -105,7 +105,7 @@ $pw
 $pw
 END
         log_message "PRODUCTION - SECURING ROOT."
-        passwd holuser <<END
+        passwd root <<END
 $pw
 $pw
 END
