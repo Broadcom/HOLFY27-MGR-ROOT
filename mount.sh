@@ -104,6 +104,11 @@ secure_holuser() {
 $pw
 $pw
 END
+        log_message "PRODUCTION - SECURING ROOT."
+        passwd holuser <<END
+$pw
+$pw
+END
         rm -f ~root/clear.txt
         if [ -f ~holuser/.ssh/authorized_keys ]; then
             mv ~holuser/.ssh/authorized_keys ~holuser/.ssh/unauthorized_keys
